@@ -1,6 +1,6 @@
 """
 =============================================================
-Valid Sudoku — Skeleton File
+Valid Sudoku
 스도쿠 검증기
 =============================================================
 # 👤 이름 / Name: 이건우
@@ -17,39 +17,47 @@ def is_valid_sudoku(board: list[list[str]]) -> bool:
     #         [EN] Check each row for duplicate numbers. Ignore 0 (empty cells).
     #         힌트 / Hint: for row in board: ... 안에서 set을 사용
     for row in board:
-        count = 0
+        dup_count = 0
+        set_row = set()
         for num in row:
-            if num == 0:
-                continue
-            else:
-                count += 1
-
-        if len(set(row))-1 != count:
+            if num != 0:
+                dup_count += 1
+                set_row.add(num)
+        if dup_count != len(set_row):
             return False
 
     # TODO 2: [KO] 각 열(column)에 중복된 숫자가 있는지 확인하세요. 0은 무시합니다.
     #         [EN] Check each column for duplicate numbers. Ignore 0.
     #         힌트 / Hint: 열 인덱스를 고정하고 행을 순회: board[row_index][col_index]
-    for col in range(0, 10):
-        count = 0
+    for col in range(0, 9):
+        dup_count = 0
         set_col = set()
-        for row in range(0, 10):
+        for row in range(0, 9):
             if board[row][col] != 0:
-                count += 1
-                set.add(board[row][col])
-        if count != len(set_col):
+                dup_count += 1
+                set_col.add(board[row][col])
+        if dup_count != len(set_col):
             return False
 
     # TODO 3: [KO] 9개의 3x3 박스 각각에 중복된 숫자가 있는지 확인하세요. 0은 무시합니다.
     #         [EN] Check each of the nine 3x3 boxes for duplicates. Ignore 0.
     #         힌트 / Hint: 박스의 시작 좌표는 (box_row * 3, box_col * 3)
     #                     where box_row, box_col in range(3)
-    for box_row, box_col in range(3):
-        pass
+    box_start_idx = ((0, 0), (0, 3), (0, 6), (3, 0), (3, 3), (3, 6), (6, 0), (6, 3), (6, 6))
+    for box_row, box_col in box_start_idx:
+        dup_count = 0
+        set_box = set()
+        for row in range(box_row, box_row+3):
+            for col in range(box_col, box_col+3):
+                if board[row][col] != 0:
+                    dup_count += 1
+                    set_box.add(board[row][col])
+        if dup_count != len(set_box):
+            return False
 
     # TODO 4: [KO] 모든 검사를 통과하면 True를 반환하세요.
     #         [EN] If all checks pass, return True.
-    return False  # [KO] 이 줄을 적절히 수정하세요 / [EN] Modify this line appropriately
+    return True  # [KO] 이 줄을 적절히 수정하세요 / [EN] Modify this line appropriately
 
 
 # ============================================================
