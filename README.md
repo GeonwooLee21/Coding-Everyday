@@ -20,8 +20,6 @@ Small disciplines repeated with consistency every day lead to great achievements
   - 데이터를 기반으로 의미 있는 결과를 도출하는 과정에 관심
 - 🎧 **음악 감상**
   - 최근엔 Aphex Twin, Autechre 등의 엠비언트 음악을 즐겨 듣는 편
-- ☕ **커피**
-  - 아침에 커피 한잔하는 시간을 좋아하는 편
 
 ---
 
