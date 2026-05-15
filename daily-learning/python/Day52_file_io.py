@@ -131,7 +131,7 @@ def write_summary(file_path: str, grades: list) -> None:
 # ============================================================
 if __name__ == "__main__":
     # 테스트용 입력 파일 만들기 / Create test input file
-    with open("./daily-learning/python/data/grades.txt", "w", encoding="utf-8") as f:
+    with open("./daily-learning/python/data/input/grades.txt", "w", encoding="utf-8") as f:
         f.write("Alice,85\n")
         f.write("Bob,72\n")
         f.write("Charlie,90\n")
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     print("=" * 50)
     print("테스트 1 / Test 1: read_grades")
     print("=" * 50)
-    grades = read_grades("./daily-learning/python/data/grades.txt")
+    grades = read_grades("./daily-learning/python/data/input/grades.txt")
     print(f"결과 / Result: {grades}")
     expected = [("Alice", 85), ("Bob", 72), ("Charlie", 90),
                 ("Diana", 68), ("Eve", 95)]
@@ -152,9 +152,9 @@ if __name__ == "__main__":
     print("=" * 50)
     print("테스트 2 / Test 2: write_summary")
     print("=" * 50)
-    write_summary("./daily-learning/python/data/summary.txt", grades)
+    write_summary("./daily-learning/python/data/output/summary.txt", grades)
     try:
-        with open("./daily-learning/python/data/summary.txt", "r", encoding="utf-8") as f:
+        with open("./daily-learning/python/data/output/summary.txt", "r", encoding="utf-8") as f:
             output = f.read()
         print("--- summary.txt 내용 / contents ---")
         print(output)
