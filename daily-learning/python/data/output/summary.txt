@@ -1,5 +1,0 @@
-=== Grade Summary ===
-Total students: 5
-Average score: 82.00
-Highest: AliceCharlieEve (95)
-Lowest: AliceBobDiana (68)
