@@ -1,6 +1,12 @@
 """
-🎬 Movie Data Pipeline — Practice Skeleton
-영화 데이터 파이프라인 — 연습 스켈레톤
+===============================================================
+🎬 Movie Data Pipeline
+영화 데이터 파이프라인
+===============================================================
+# 👤 이름 / Name: 이건우
+# 📅 날짜 / Date: 260517
+===============================================================
+
 
 Fill in the TODOs below. The test block at the bottom will run automatically.
 아래 TODO를 채워주세요. 맨 아래의 테스트 블록은 자동으로 실행됩니다.
@@ -50,11 +56,14 @@ def save_ratings(ratings, file_path):
     """
     # TODO: Open the file in "w" mode with utf-8 encoding
     # TODO: "w" 모드, utf-8 인코딩으로 파일 열기
+    with open(file_path, "w", encoding="utf-8") as f:
 
     # TODO: Write the header / 헤더 작성
+        f.write(f"title,genre,year,rating\n")
 
     # TODO: Loop and write each row / 각 행을 반복하면서 작성
-    pass
+        for movie in ratings:
+            f.write(f"{movie[0]},{movie[1]},{movie[2]},{movie[3]}\n")
 
 
 def save_filtered_by_genre(ratings, genre, file_path):
@@ -66,17 +75,24 @@ def save_filtered_by_genre(ratings, genre, file_path):
                 먼저 필터링된 리스트를 만든 후 save_ratings()를 호출하세요.
     """
     # TODO: Build a filtered list / 필터링된 리스트 만들기
+    count = 0
+    filtered_list = []
+    for movie in ratings:
+        if movie[1] == genre:
+            filtered_list.append(movie)
+            count += 1
 
     # TODO: Save it using save_ratings() / save_ratings()로 저장
+    save_ratings(filtered_list, file_path)
 
     # TODO: Return the count / 개수 반환
-    pass
+    return count
 
 
 def save_top_n(ratings, n, file_path):
     """
     Save the top N movies by rating (descending).
-    평점이 높은 순서대로 상위 N개 영화를 저장합니다.
+    평점이 높은 순서대로 상위 N개 영화를 저장합다.
 
     ⚠️ NO sorted() allowed! / sorted() 사용 금지!
     Use selection-sort style: repeatedly find the max and append.
@@ -95,14 +111,29 @@ def save_top_n(ratings, n, file_path):
            실제 저장된 개수 반환 (리스트가 작으면 n보다 적을 수 있음)
     """
     # TODO: Make a copy of ratings / ratings의 복사본 만들기
+    ratings_clone = ratings.copy()
 
     # TODO: Build a sorted list (descending by rating)
     # TODO: 정렬된 리스트 만들기 (평점 내림차순)
+    ratings_sorted = []
+    while ratings_clone:
+        highest_rated_movie = ratings_clone[0]
+        highest_rating = highest_rated_movie[3]
+        ratings_idx = 0
+        for idx, movie in enumerate(ratings_clone):
+            if movie[3] > highest_rating:
+                highest_rated_movie = movie
+                highest_rating = movie[3]
+                ratings_idx = idx
+        ratings_sorted.append(highest_rated_movie)
+        ratings_clone.pop(ratings_idx)
 
     # TODO: Take the top n / 상위 n개 선택
+    ratings_sorted = ratings_sorted[:n]
 
     # TODO: Save and return count / 저장하고 개수 반환
-    pass
+    save_ratings(ratings_sorted, file_path)
+    return len(ratings_sorted)
 
 
 def save_summary_report(ratings, file_path):
@@ -147,14 +178,39 @@ def save_summary_report(ratings, file_path):
                         ...
     """
     # TODO: Initialize three parallel lists / 평행 리스트 3개 초기화
+    genres = []
+    counts = []
+    totals = []
 
     # TODO: Loop through ratings and update the lists
     # TODO: ratings를 반복하면서 리스트 갱신
+    for movie in ratings:
+        current_genre = movie[1]
+        current_rating = movie[3]
+        found = False
+        for i in range(len(genres)):
+            if genres[i] == current_genre:
+                counts[i] += 1
+                totals[i] += current_rating
+                found = True
+                break
+        if not found:
+            genres.append(current_genre)
+            counts.append(1)
+            totals.append(current_rating)
 
     # TODO: Write the summary file / 요약 파일 작성
+    with open(file_path, "w", encoding="utf-8") as f:
+        # Header: "genre,count,average_rating\\n"
+        f.write("genre,count,average_rating\n")
 
+        # For each genre: write "genre,count,avg" where avg = totals[i] / counts[i]
+        for i in range(len(genres)):
+            # Format average to 2 decimal places: f"{avg:.2f}"
+            f.write(f"{genres[i]},{counts[i]},{totals[i]/counts[i]:.2f}\n")
+        
     # TODO: Return number of genres / 장르 개수 반환
-    pass
+    return len(genres)
 
 
 def load_ratings_safe(file_path):
@@ -169,10 +225,12 @@ def load_ratings_safe(file_path):
     """
     # TODO: Wrap load_ratings() in try/except
     # TODO: load_ratings()를 try/except로 감싸기
-
-    # TODO: On FileNotFoundError, return []
-    # TODO: FileNotFoundError 발생 시 [] 반환
-    pass
+    try:
+        return load_ratings(file_path)
+    except FileExistsError:
+        # TODO: On FileNotFoundError, return []
+        # TODO: FileNotFoundError 발생 시 [] 반환
+        return []
 
 
 # ============================================================
@@ -193,14 +251,14 @@ if __name__ == "__main__":
     print("=" * 60)
 
     try:
-        ratings = load_ratings("movie_ratings.csv")
+        ratings = load_ratings("./daily-learning/python/data/input/movie_ratings.csv")
         print(f"\n[0] Loaded {len(ratings)} rows from movie_ratings.csv")
 
         # Test 1: save_ratings round trip
         print("\n[1] save_ratings — round trip / 왕복 테스트")
         try:
-            save_ratings(ratings, "output/all_movies.csv")
-            reloaded = load_ratings("output/all_movies.csv")
+            save_ratings(ratings, "./daily-learning/python/data/output/all_movies.csv")
+            reloaded = load_ratings("./daily-learning/python/data/output/all_movies.csv")
             if reloaded == ratings:
                 print("    ✅ Round trip successful")
             else:
@@ -211,10 +269,10 @@ if __name__ == "__main__":
         # Test 2: save_filtered_by_genre
         print("\n[2] save_filtered_by_genre('Drama')")
         try:
-            count = save_filtered_by_genre(ratings, "Drama", "output/drama.csv")
+            count = save_filtered_by_genre(ratings, "Drama", "./daily-learning/python/data/output/drama.csv")
             print(f"    Got count: {count} (expected 3)")
-            if os.path.exists("output/drama.csv"):
-                drama = load_ratings("output/drama.csv")
+            if os.path.exists("./daily-learning/python/data/output/drama.csv"):
+                drama = load_ratings("./daily-learning/python/data/output/drama.csv")
                 print(f"    Reloaded: {[r[0] for r in drama]}")
             else:
                 print(f"    ⏳ output/drama.csv not created yet")
@@ -224,10 +282,10 @@ if __name__ == "__main__":
         # Test 3: save_top_n
         print("\n[3] save_top_n(3)")
         try:
-            n = save_top_n(ratings, 3, "output/top3.csv")
+            n = save_top_n(ratings, 3, "./daily-learning/python/data/output/top3.csv")
             print(f"    Saved count: {n} (expected 3)")
-            if os.path.exists("output/top3.csv"):
-                top = load_ratings("output/top3.csv")
+            if os.path.exists("./daily-learning/python/data/output/top3.csv"):
+                top = load_ratings("./daily-learning/python/data/output/top3.csv")
                 for movie in top:
                     print(f"      - {movie[0]}: {movie[3]}")
             else:
@@ -238,10 +296,10 @@ if __name__ == "__main__":
         # Test 4: save_summary_report
         print("\n[4] save_summary_report")
         try:
-            n_genres = save_summary_report(ratings, "output/summary.csv")
+            n_genres = save_summary_report(ratings, "./daily-learning/python/data/output/summary.csv")
             print(f"    Genres: {n_genres} (expected 6)")
-            if os.path.exists("output/summary.csv"):
-                with open("output/summary.csv", "r", encoding="utf-8") as f:
+            if os.path.exists("./daily-learning/python/data/output/summary.csv"):
+                with open("./daily-learning/python/data/output/summary.csv", "r", encoding="utf-8") as f:
                     for line in f:
                         print(f"      {line.rstrip()}")
             else:
@@ -252,7 +310,7 @@ if __name__ == "__main__":
         # Test 5: load_ratings_safe
         print("\n[5] load_ratings_safe — missing file / 없는 파일")
         try:
-            data = load_ratings_safe("does_not_exist.csv")
+            data = load_ratings_safe("./daily-learning/python/data/input/does_not_exist.csv")
             if data == []:
                 print(f"    ✅ Returned [] safely")
             else:
@@ -263,9 +321,9 @@ if __name__ == "__main__":
         # Test 6: Edge cases
         print("\n[6] Edge cases / 경계 조건")
         try:
-            save_ratings([], "output/empty.csv")
-            if os.path.exists("output/empty.csv"):
-                empty = load_ratings("output/empty.csv")
+            save_ratings([], "./daily-learning/python/data/output/empty.csv")
+            if os.path.exists("./daily-learning/python/data/output/empty.csv"):
+                empty = load_ratings("./daily-learning/python/data/output/empty.csv")
                 print(f"    Empty list round trip: {len(empty)} rows (expected 0)")
             else:
                 print(f"    ⏳ Empty file not created")
@@ -273,9 +331,9 @@ if __name__ == "__main__":
             print(f"    ⏳ Empty list — {type(e).__name__}")
 
         try:
-            save_top_n(ratings, 100, "output/top100.csv")
-            if os.path.exists("output/top100.csv"):
-                top100 = load_ratings("output/top100.csv")
+            save_top_n(ratings, 100, "./daily-learning/python/data/output/top100.csv")
+            if os.path.exists("./daily-learning/python/data/output/top100.csv"):
+                top100 = load_ratings("./daily-learning/python/data/output/top100.csv")
                 print(f"    TOP 100 (only 12 exist): {len(top100)} saved (expected 12)")
             else:
                 print(f"    ⏳ top100 file not created")
