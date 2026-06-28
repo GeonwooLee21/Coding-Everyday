@@ -4,7 +4,7 @@ Day 5: Python Class Practice — Gym Membership System
 Day 5: Python 클래스 연습 — 헬스장 회원권 시스템
 ===============================================================
 # 👤 이름 / Name: 이건우
-# 📅 날짜 / Date: 260525
+# 📅 날짜 / Date: 260526
 ===============================================================
 
 학습 목표 / Learning Objectives:
@@ -57,7 +57,13 @@ class GymMembership:
     # Define setters first, then call them from __init__ to reuse validation logic.
     def __init__(self, member_id, name, tier, expiration_date):
         # 여기에 코드 작성 / Your code here
-        pass
+        if not member_id.strip():
+            raise ValueError("member_id is empty.")
+        self._member_id = member_id
+        self.set_name(name)
+        self.set_tier(tier)
+        self.set_expiration_date(expiration_date)
+        self._check_in_count = 0
     
     # ========================================
     # TODO 2: Getter 메서드 5개 / 5 getter methods
@@ -65,15 +71,24 @@ class GymMembership:
     # 각 속성에 대한 getter를 만드세요 / Make a getter for each attribute
     
     # TODO 2-1: get_member_id() → self._member_id 반환 / return self._member_id
+    def get_member_id(self):
+        return self._member_id
     
     # TODO 2-2: get_name() → self._name 반환 / return self._name
-    
+    def get_name(self):
+        return self._name
+
     # TODO 2-3: get_tier() → self._tier 반환 / return self._tier
-    
+    def get_tier(self):
+        return self._tier
+
     # TODO 2-4: get_expiration_date() → self._expiration_date 반환
-    
+    def get_expiration_date(self):
+        return self._expiration_date
+
     # TODO 2-5: get_check_in_count() → self._check_in_count 반환
-    
+    def get_check_in_count(self):
+        return self._check_in_count
     
     # ========================================
     # TODO 3: Setter 메서드 3개 (검증 포함!) / 3 setters with validation
@@ -85,19 +100,37 @@ class GymMembership:
     #     Not a string OR strip() is empty → raise ValueError
     #   - 통과하면 self._name = name.strip()
     #     Otherwise self._name = name.strip()
+    def set_name(self, name):
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError("name is not a stirng or empty.")
+        self._name = name.strip()
     
     # TODO 3-2: set_tier(tier)
     # 조건 / Conditions:
     #   - tier가 self.VALID_TIERS에 없으면 → raise ValueError
     #     Not in VALID_TIERS → raise ValueError
     #   - 통과하면 self._tier = tier
-    
+    def set_tier(self, tier):
+        if tier not in self.VALID_TIERS:
+            raise ValueError("It is not a valid tier.")
+        self._tier = tier
+
     # TODO 3-3: set_expiration_date(expiration_date)
     # 조건 / Conditions:
     #   - 문자열이 아니면 → raise ValueError
     #   - "YYYY-MM-DD" 형식으로 파싱 안 되면 → raise ValueError
     #     Hint: try: date.fromisoformat(expiration_date) ... except ValueError: raise ...
     #   - 통과하면 self._expiration_date = expiration_date
+    def set_expiration_date(self, expiration_date):
+        if not isinstance(expiration_date, str):
+            raise ValueError("expiration_date is not string.")
+        
+        try:
+            date.fromisoformat(expiration_date)
+        except ValueError:
+            raise ValueError("expiration_date cannot parse to YYYY-MM-DD.")
+        
+        self._expiration_date = expiration_date
     
     
     # ⚠️ 주의 / Warning:
@@ -118,7 +151,13 @@ class GymMembership:
     #   4) 통과하면 self._check_in_count += 1
     def check_in(self, today):
         # 여기에 코드 작성 / Your code here
-        pass
+        today_date = date.fromisoformat(today)
+        exp_date = date.fromisoformat(self._expiration_date)
+
+        if today_date > exp_date:
+            raise ValueError("Cannot check in: membership expired.")
+        
+        self._check_in_count += 1
     
     
     # ========================================
@@ -135,7 +174,15 @@ class GymMembership:
     #   4) 통과하면 self._tier = new_tier
     def upgrade_tier(self, new_tier):
         # 여기에 코드 작성 / Your code here
-        pass
+        if new_tier not in self.VALID_TIERS:
+            raise ValueError("It is not valid tier.")
+        
+        current_rank = self.VALID_TIERS.index(self._tier)
+        new_rank = self.VALID_TIERS.index(new_tier)
+        if new_rank <= current_rank:
+            raise ValueError("Cannot upgrade: Tier can only go up.")
+        
+        self._tier = new_tier
     
     
     # ========================================
@@ -153,8 +200,21 @@ class GymMembership:
     # 힌트 / Hint: 검증 먼저, 그 다음 비교, 그 다음 저장
     # Validate first → compare → store
     def renew(self, new_expiration_date):
-        # 여기에 코드 작성 / Your code here
-        pass
+        # 형식 검증만 먼저 (저장 전)
+        if not isinstance(new_expiration_date, str):
+            raise ValueError("expiration_date is not string.")
+        try:
+            new_expr_date = date.fromisoformat(new_expiration_date)
+        except ValueError:
+            raise ValueError("expiration_date cannot parse to YYYY-MM-DD.")
+       
+        # 비교
+        current_expr_date = date.fromisoformat(self._expiration_date)
+        if new_expr_date <= current_expr_date:
+            raise ValueError("Cannot renew: Expiration date remaining.")
+        
+        # 검증 통과 후 문자열로 저장
+        self._expiration_date = new_expiration_date
     
     
     # ========================================
@@ -168,7 +228,10 @@ class GymMembership:
     #   - Return True if today <= expiration, else False
     def is_active(self, today):
         # 여기에 코드 작성 / Your code here
-        pass
+        if today <= self._expiration_date:
+            return True
+        else:
+            return False
     
     
     # ========================================
@@ -178,7 +241,7 @@ class GymMembership:
     # GymMembership(id=M007, name=Eunwoo Bae, tier=vip, expires=2027-08-15, check_ins=2)
     def __str__(self):
         # 여기에 코드 작성 / Your code here
-        pass
+        return f"GymMembership(id={self._member_id}, name={self._name}, tier={self._tier}, expires={self._expiration_date}, check_ins={self._check_in_count})"
 
 
 # ============================================================
